@@ -1,4 +1,4 @@
-# Verify OIDC Demo
+# OIDC Demo
 
 Use this application to configure your first OIDC application for client authentication. The application is built with Node.js and uses [openid-client](https://www.npmjs.com/package/openid-client). All UI assets can be found under [views](/views) and [public](/public). All views are written using vanilla HTML and JS and templated using Handlebars.
 
