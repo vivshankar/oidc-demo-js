@@ -1,0 +1,32 @@
+{
+  "name": "oidc-demo-js",
+  "version": "1.0.0",
+  "description": "Demo app that acts as a OIDC RP",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server/server.js",
+    "start": "node server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vivshankar/verify-oidc-demo-js.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vivshankar/verify-oidc-demo-js/issues"
+  },
+  "homepage": "https://github.com/vivshankar/verify-oidc-demo-js#readme",
+  "dependencies": {
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
+    "express-handlebars": "^5.3.2",
+    "express-session": "^1.17.2",
+    "jsonwebtoken": "^8.5.1",
+    "openid-client": "^5.0.2",
+    "uuidv4": "^6.2.8",
+    "verify-privacy-sdk-js": "https://github.com/vivshankar/verify-privacy-sdk-js.git#0.9.5"
+  }
+}
