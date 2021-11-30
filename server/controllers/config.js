@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 exports.Config = {
+    tenantUrl    : process.env.TENANT_URL,
     discoveryUrl : process.env.DISCOVERY_URL,
     clientId     : process.env.CLIENT_ID,
     clientSecret : process.env.CLIENT_SECRET,
@@ -9,4 +10,5 @@ exports.Config = {
     scope        : process.env.SCOPE,
     signupLink   : process.env.USER_REGISTRATION_LINK,
     themeId      : process.env.THEME_ID,
+    usePar       : process.env.USE_PAR,
 };
