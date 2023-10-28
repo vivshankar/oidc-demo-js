@@ -26,7 +26,7 @@ class UsersController {
 
     introspect = async (req) => {
         let authToken = OAuthController.getAuthToken(req);
-        const data = await tokenService.introspect(authToken.access_token)
+        const data = await OAuthController.introspect(authToken.access_token)
         console.log(`Introspection payload=\n${JSON.stringify(data, null, 2)}\n`);
         return data;
     };
