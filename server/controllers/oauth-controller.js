@@ -82,7 +82,7 @@ class OAuthController {
         console.log('Discovered issuer %s %O', this._oidcIssuer.issuer, this._oidcIssuer.metadata);
 
         let url = ""
-        const code_verifier = generators.codeVerifier();
+        const code_verifier = generators.codeVerifier(50);
         const code_challenge = generators.codeChallenge(code_verifier);
 
         req.session.codeVerifier = code_verifier;
@@ -96,6 +96,7 @@ class OAuthController {
                 response_types: ['code'],
                 token_endpoint_auth_method: config.clientAuthMethod,
                 token_endpoint_auth_signing_alg: 'PS256',
+                id_token_signed_response_alg: 'PS256',
             }, this._jwks);
     
             url = this._client.authorizationUrl({
@@ -113,14 +114,17 @@ class OAuthController {
                 token_endpoint_auth_method: 'private_key_jwt',
                 token_endpoint_auth_signing_alg: 'PS256',
                 tls_client_certificate_bound_access_tokens: false,
-                id_token_signed_response_alg: 'RS256',
+                id_token_signed_response_alg: 'PS256',
             }, this._jwks);
 
             // build JWT
-            let parData = await this._client.pushedAuthorizationRequest({
+            var parReqData = {
                 scope: this._scope,
                 state: uuid(),
-            }, {
+            }
+
+            console.log(`PAR request\n${JSON.stringify(parReqData, null, 2)}\n`)
+            let parData = await this._client.pushedAuthorizationRequest(parReqData, {
                 clientAssertionPayload: { 
                     sub: config.clientId, 
                     iss: config.clientId,
@@ -131,6 +135,8 @@ class OAuthController {
                 },
             });
 
+            console.log(`PAR response\n${JSON.stringify(parData, null, 2)}\n`);
+
             url = this._client.authorizationUrl({
                 request_uri: parData.request_uri,
                 code_challenge,
@@ -139,8 +145,11 @@ class OAuthController {
         }
         
         var parsedURL = new URL(url);
-        parsedURL.searchParams.append('deviceName', config.deviceName);
+        if (config.deviceName != "") {
+            parsedURL.searchParams.append('deviceName', config.deviceName);
+        }        
 
+        console.log(`\n\nRedirecting the browser to:\n${parsedURL.toString()}\n\n`);
         res.redirect(parsedURL.toString())
     }
 
@@ -238,6 +247,30 @@ class OAuthController {
         let authToken = OAuthController.getAuthToken(req);
         let decoded = jwt.decode(authToken.id_token);
         return decoded;
+    }
+
+    static introspect = async (accessToken) => {
+        var _jwks = undefined;
+        if (config.clientAuthMethod == "private_key_jwt") {
+            try {
+                const data = fs.readFileSync(path.resolve(__dirname, `../../config/jwks.json`), 'utf8');
+                _jwks = { "keys": JSON.parse(data) };
+            } catch (err) {
+                console.warn(err);
+                throw "jwks.json is not configured but client auth method is configured to use 'private_key_jwt'"
+            }
+        }
+
+        var _oidcIssuer = await Issuer.discover(config.discoveryUrl);
+        var _client = new _oidcIssuer.Client({
+            client_id: config.clientId,
+            client_secret: config.clientSecret,
+            token_endpoint_auth_method: config.clientAuthMethod,
+            token_endpoint_auth_signing_alg: 'PS256',
+        }, _jwks);
+
+        const response = await _client.introspect(accessToken, "access_token");
+        return JSON.parse(JSON.stringify(response));
     }
 }
 

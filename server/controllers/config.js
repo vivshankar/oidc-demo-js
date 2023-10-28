@@ -5,6 +5,12 @@ let clientAuthMethod = process.env.CLIENT_AUTH_METHOD;
 if (clientAuthMethod == null || clientAuthMethod == "") {
     clientAuthMethod = "client_secret_post";
 }
+
+let deviceName = process.env.DEVICE_NAME;
+if (deviceName == null || deviceName == "") {
+    deviceName = ""
+}
+
 exports.Config = {
     tenantUrl           : process.env.TENANT_URL,
     discoveryUrl        : process.env.DISCOVERY_URL,
@@ -18,5 +24,5 @@ exports.Config = {
     usePar              : process.env.USE_PAR,
     useDPoP             : process.env.USE_DPOP,
     resourceBase        : process.env.RESOURCE_BASE_URL,
-    deviceName          : process.env.DEVICE_NAME,
+    deviceName          : deviceName,
 };
