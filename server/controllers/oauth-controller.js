@@ -2,11 +2,66 @@ const config = require('./config').Config;
 const Issuer = require('openid-client').Issuer
 const { uuid } = require('uuidv4');
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto');
+const HTTPUtil = require('../services/httputil');
+const resourceClient = new HTTPUtil(config.resourceBase);
+
+var dpopKeyPair = {
+    publicKey: null,
+    privateKey: null,
+}
+
 
 class OAuthController {
 
     constructor(scope) {
         this._scope = scope;
+    }
+
+    resource = async (req, res) => {
+        if (!OAuthController.isLoggedIn(req)) {
+            res.redirect('/')
+            return;
+        }
+
+        let tokenSet = OAuthController.getAuthToken(req);
+        // Make a call to the resource API protected by DPoP to test
+        var dpopProof = ""
+        var authHeader = `Bearer ${tokenSet.access_token}`;
+        if (config.useDPoP == "true") {
+            var key = crypto.createPrivateKey({
+                key: dpopKeyPair.privateKey,
+                format: 'jwk'
+            });
+
+            const ath = crypto.createHash('sha256')
+                   .update(tokenSet.access_token)
+                   .digest('base64url');
+
+            var currentTimestamp = new Date().getTime()/1000;
+            var payload = {
+                "jti": uuid(),
+                'iat': currentTimestamp,
+                'exp': currentTimestamp + 1*1800,
+                "htm": "GET",
+                "htu": `${config.resourceBase}/photos`,
+                "ath": ath
+            };
+
+            dpopProof = await this._client.dpopProof(payload, key, tokenSet.access_token);
+            console.log(`DPoP proof for the resource API call=${dpopProof}`);
+
+            authHeader = `DPoP ${tokenSet.access_token}`;
+        }
+
+        let response = await resourceClient.get('/photos', {
+            "tenant": config.tenantUrl,
+            "Authorization": authHeader,
+            "dpop": dpopProof,
+        });
+
+        console.log(`\n\n=======\nResponse from the resource API /photos\n=======\n\n${response.data}\n`);
+        res.send(response.data);
     }
 
     authorize = async (req, res) => {
@@ -79,7 +134,10 @@ class OAuthController {
             });
         }
         
-        res.redirect(url)
+        var parsedURL = new URL(url);
+        parsedURL.searchParams.append('deviceName', config.deviceName);
+
+        res.redirect(parsedURL.toString())
     }
 
     aznCallback = async (req, res) => {
@@ -95,13 +153,41 @@ class OAuthController {
                 aud: this._oidcIssuer.metadata.token_endpoint,
             }
         }
+
+        let key = null; 
+        if (config.useDPoP == "true") {
+            const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+                modulusLength: 4096,
+                publicKeyEncoding: {
+                  type: 'spki',
+                  format: 'jwk'
+                },
+                privateKeyEncoding: {
+                  type: 'pkcs8',
+                  format: 'jwk',
+                  cipher: 'aes-256-cbc',
+                  passphrase: uuid(),
+                }});
+
+            dpopKeyPair = {
+                publicKey: publicKey,
+                privateKey: privateKey,
+            }
+
+            key = crypto.createPrivateKey({
+                key: dpopKeyPair.privateKey,
+                format: 'jwk'
+            });
+        }
+        
         const tokenSet = await this._client.callback(config.redirectUri, params, {
             state: params.state
         }, {
             clientAssertionPayload: clientAssertionPayload,
+            DPoP: key,
         });
-        console.log('received and validated tokens %j', tokenSet);
-        console.log('validated ID Token claims %j', tokenSet.claims());
+        console.log(`Received and validated tokens\n${JSON.stringify(tokenSet, null, 2)}\n`);
+        console.log('Validated ID Token claims %j', tokenSet.claims());
 
         req.session.authToken = tokenSet;
         req.session.token = tokenSet;
@@ -124,24 +210,10 @@ class OAuthController {
             return;
         }
 
-        let authToken = OAuthController.getAuthToken(req);
-        this._authClient.revokeToken(authToken, 'access_token').then(response => {
-
-        }).catch(error => {
-            console.log(error);
-        })
-        
-        // revoking the refresh_token
-        this._authClient.revokeToken(authToken, 'refresh_token').then(response => {
-        
-        }).catch(error => {
-            console.log(error);
-        })
-
         req.session.destroy();
         const proxyHost = req.headers["x-forwarded-host"];
         const host = proxyHost ? proxyHost : req.headers.host;
-        res.redirect(config.tenantUrl + '/idaas/mtfim/sps/idaas/logout?redirectUrl=' + encodeURIComponent(req.protocol + '://' + host) + "&themeId=" + config.themeId);
+        res.redirect('https://' + config.tenantUrl + '/idaas/mtfim/sps/idaas/logout?redirectUrl=' + encodeURIComponent(req.protocol + '://' + host) + "&themeId=" + config.themeId);
     }
 
     static isLoggedIn(req) {
@@ -154,6 +226,12 @@ class OAuthController {
         }
     
         return null;
+    }
+
+    static getUserPayload = (req) => {
+        let authToken = OAuthController.getAuthToken(req);
+        let decoded = jwt.decode(authToken.id_token);
+        return decoded;
     }
 }
 

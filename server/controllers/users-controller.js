@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken')
 const OAuthController = require('./oauth-controller');
 const Privacy = require('verify-privacy-sdk-js');
 const config = require('./config').Config;
+const TokenService = require('../services/oauth/tokenService')
+const tokenService = new TokenService();
 
 class UsersController {
 
@@ -22,14 +24,27 @@ class UsersController {
         res.render('users', { user: this.getUserPayload(req), title: 'User Main' });
     }
 
-    getProfile = (req, res) => {
+    introspect = async (req) => {
+        let authToken = OAuthController.getAuthToken(req);
+        const data = await tokenService.introspect(authToken.access_token)
+        console.log(`Introspection payload=\n${JSON.stringify(data, null, 2)}\n`);
+        return data;
+    };
+
+    getProfile = async (req, res) => {
         if (!OAuthController.isLoggedIn(req)) {
             res.redirect('/');
             return;
         }
 
         let idTokenPayload = this.getUserPayload(req);
-        res.render('profile', { user: idTokenPayload, fullJson: JSON.stringify(idTokenPayload, null, 4), title: 'Profile Information' });
+        let introspection = await this.introspect(req);
+        res.render('profile', { 
+            user: idTokenPayload, 
+            fullJson: JSON.stringify(idTokenPayload, null, 4), 
+            introspection: JSON.stringify(introspection, null, 2), 
+            title: 'Profile Information' 
+        });
     }
 
     getConsents = (req, res) => {

@@ -34,6 +34,10 @@
 					<a tabindex="0" id="tab-link-2-default" class="darktabs bx--tabs__nav-link"
 						href="javascript:void(0)" role="tab" aria-controls="tab-panel-2-default">ID token</a>
 				</li>
+				<li class="bx--tabs__nav-item " data-target=".profile-content-tab3" role="tab">
+					<a tabindex="0" id="tab-link-3-default" class="darktabs bx--tabs__nav-link"
+						href="javascript:void(0)" role="tab" aria-controls="tab-panel-3-default">Introspection</a>
+				</li>
 			</ul>
 		</div>
 		<div class="bx--tab-content">
@@ -123,6 +127,20 @@
 						</div>
 						<pre>
 							<code class="railscasts json">{{fullJson}}</code>
+						</pre>
+					</div>
+				</div>
+			</div>
+			<div id="tab-panel-3-default" class="profile-content-tab3" role="tabpanel"
+				aria-labelledby="tab-link-3-default" aria-hidden="true" hidden>
+				<div>
+					<div style="padding-top:.125rem">
+						<div class="bx--data-table-header">
+							<h4 class="bx--data-table-header__title">Introspection payload</h4>
+							<p class="bx--data-table-header__description">This is the introspection response</p>
+						</div>
+						<pre>
+							<code class="railscasts json">{{introspection}}</code>
 						</pre>
 					</div>
 				</div>
