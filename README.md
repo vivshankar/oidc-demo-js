@@ -1,6 +1,8 @@
 # OIDC Demo
 
-Use this application to configure your first OIDC application for client authentication. The application is built with Node.js and uses [openid-client](https://www.npmjs.com/package/openid-client). All UI assets can be found under [views](/views) and [public](/public). All views are written using vanilla HTML and JS and templated using Handlebars.
+Use this application to configure your first OIDC application for client authentication. You can also toggle on more advanced use cases to learn about how to protect your APIs with stronger controls. 
+
+This application is built with Node.js and uses [openid-client](https://www.npmjs.com/package/openid-client). All UI assets can be found under [views](/views) and [public](/public). All views are written using vanilla HTML and JS and templated using Handlebars.
 
 In this app, you can do the following -
 
@@ -27,7 +29,7 @@ There are two possible configurations supported:
 
 ### Standard authorization code flow
 
-1. Generate client credentials on a OIDC OP server. Choose the grant type as authorization code, set redirect_uri to `http://localhost:3000/auth/callback` and disable PKCE validation.
+1. Generate client credentials on a OIDC OP server. Choose the grant type as authorization code and set redirect_uri to `http://localhost:3000/auth/callback`.
 
 2. Copy `dotenv` file to `.env` and populate the values as below
     - `DISCOVERY_URL`: Set the Open ID Connect discovery (well-known) endpoint here
