@@ -1,5 +1,6 @@
 const config = require('./config').Config;
 const Issuer = require('openid-client').Issuer
+const generators = require('openid-client').generators
 const { uuid } = require('uuidv4');
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto');
@@ -10,7 +11,6 @@ var dpopKeyPair = {
     publicKey: null,
     privateKey: null,
 }
-
 
 class OAuthController {
 
@@ -69,6 +69,12 @@ class OAuthController {
         console.log('Discovered issuer %s %O', this._oidcIssuer.issuer, this._oidcIssuer.metadata);
 
         let url = ""
+        const code_verifier = generators.codeVerifier();
+        const code_challenge = generators.codeChallenge(code_verifier);
+
+        req.session.codeVerifier = code_verifier;
+        req.session.save();
+
         if (config.usePar != "true") {
             this._client = new this._oidcIssuer.Client({
                 client_id: config.clientId,
@@ -81,6 +87,8 @@ class OAuthController {
             url = this._client.authorizationUrl({
                 scope: this._scope,
                 state: uuid(),
+                code_challenge,
+                code_challenge_method: 'S256',
             });
         } else {
             // generated from https://mkjwk.org/
@@ -131,6 +139,8 @@ class OAuthController {
 
             url = this._client.authorizationUrl({
                 request_uri: parData.request_uri,
+                code_challenge,
+                code_challenge_method: 'S256',
             });
         }
         
@@ -180,8 +190,10 @@ class OAuthController {
             });
         }
         
+        let codeVerifier = req.session.codeVerifier;
         const tokenSet = await this._client.callback(config.redirectUri, params, {
-            state: params.state
+            state: params.state,
+            code_verifier: codeVerifier,
         }, {
             clientAssertionPayload: clientAssertionPayload,
             DPoP: key,
