@@ -2,13 +2,16 @@
 require('dotenv').config();
 
 exports.Config = {
-    tenantUrl    : process.env.TENANT_URL,
-    discoveryUrl : process.env.DISCOVERY_URL,
-    clientId     : process.env.CLIENT_ID,
-    clientSecret : process.env.CLIENT_SECRET,
-    redirectUri  : process.env.REDIRECT_URI,
-    scope        : process.env.SCOPE,
-    signupLink   : process.env.USER_REGISTRATION_LINK,
-    themeId      : process.env.THEME_ID,
-    usePar       : process.env.USE_PAR,
+    tenantUrl       : process.env.TENANT_URL,
+    discoveryUrl    : process.env.DISCOVERY_URL,
+    clientId        : process.env.CLIENT_ID,
+    clientSecret    : process.env.CLIENT_SECRET,
+    redirectUri     : process.env.REDIRECT_URI,
+    scope           : process.env.SCOPE,
+    signupLink      : process.env.USER_REGISTRATION_LINK,
+    themeId         : process.env.THEME_ID,
+    usePar          : process.env.USE_PAR,
+    useDPoP         : process.env.USE_DPOP,
+    resourceBase    : process.env.RESOURCE_BASE_URL,
+    deviceName      : process.env.DEVICE_NAME,
 };
