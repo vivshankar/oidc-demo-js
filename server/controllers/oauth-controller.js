@@ -99,12 +99,15 @@ class OAuthController {
                 id_token_signed_response_alg: 'PS256',
             }, this._jwks);
     
-            url = this._client.authorizationUrl({
+            var reqData = {
                 scope: this._scope,
                 state: uuid(),
                 code_challenge,
                 code_challenge_method: 'S256',
-            });
+                authorization_details: config.authzDetails,
+                ...config.extraRequestParams
+            }
+            url = this._client.authorizationUrl(reqData);
         } else {
             this._client = new this._oidcIssuer.FAPI1Client({
                 client_id: config.clientId,
@@ -121,6 +124,8 @@ class OAuthController {
             var parReqData = {
                 scope: this._scope,
                 state: uuid(),
+                authorization_details: config.authzDetails,
+                ...config.extraRequestParams
             }
 
             console.log(`PAR request\n${JSON.stringify(parReqData, null, 2)}\n`)
@@ -167,7 +172,7 @@ class OAuthController {
             }
         }
 
-        let key = null; 
+        let key = undefined;
         if (config.useDPoP == "true") {
             const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
                 modulusLength: 4096,

@@ -4,10 +4,11 @@ CLIENT_ID=
 CLIENT_SECRET=
 REDIRECT_URI=http://localhost:3000/auth/callback
 SCOPE=openid profile
+#AUTHZ_DETAILS=[{"type":"action_on_resource","resource":"photo","action":"upload"}]
+#EXTRA_REQUEST_PARAMS={"acr_values":"abc efg", "xyz": "customval"}
 CLIENT_AUTH_METHOD=
 USE_PAR=false
 USE_DPOP=false
 RESOURCE_BASE_URL=
 USER_REGISTRATION_LINK=https://tenant.verify.ibm.com/register/verifydemo
 THEME_ID=
-

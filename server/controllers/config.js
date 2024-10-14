@@ -11,6 +11,13 @@ if (deviceName == null || deviceName == "") {
     deviceName = ""
 }
 
+let extraRequestParams = process.env.EXTRA_REQUEST_PARAMS;
+if (extraRequestParams != null && extraRequestParams != "") {
+    extraRequestParams = JSON.parse(extraRequestParams);
+} else {
+    extraRequestParams = {};
+}
+
 exports.Config = {
     tenantUrl           : process.env.TENANT_URL,
     discoveryUrl        : process.env.DISCOVERY_URL,
@@ -18,6 +25,7 @@ exports.Config = {
     clientSecret        : process.env.CLIENT_SECRET,
     redirectUri         : process.env.REDIRECT_URI,
     scope               : process.env.SCOPE,
+    authzDetails        : process.env.AUTHZ_DETAILS,
     signupLink          : process.env.USER_REGISTRATION_LINK,
     themeId             : process.env.THEME_ID,
     clientAuthMethod    : clientAuthMethod,
@@ -25,4 +33,5 @@ exports.Config = {
     useDPoP             : process.env.USE_DPOP,
     resourceBase        : process.env.RESOURCE_BASE_URL,
     deviceName          : deviceName,
+    extraRequestParams  : extraRequestParams,
 };
