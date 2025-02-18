@@ -14,6 +14,11 @@ if (deviceName == null || deviceName == "") {
 let extraRequestParams = process.env.EXTRA_REQUEST_PARAMS;
 if (extraRequestParams != null && extraRequestParams != "") {
     extraRequestParams = JSON.parse(extraRequestParams);
+    Object.keys(extraRequestParams).forEach(function(key) {
+        if (extraRequestParams[key] != null && typeof extraRequestParams[key] === "object") {
+            extraRequestParams[key] = JSON.stringify(extraRequestParams[key]);
+        }
+    })
 } else {
     extraRequestParams = {};
 }
@@ -25,7 +30,6 @@ exports.Config = {
     clientSecret        : process.env.CLIENT_SECRET,
     redirectUri         : process.env.REDIRECT_URI,
     scope               : process.env.SCOPE,
-    authzDetails        : process.env.AUTHZ_DETAILS,
     signupLink          : process.env.USER_REGISTRATION_LINK,
     themeId             : process.env.THEME_ID,
     clientAuthMethod    : clientAuthMethod,

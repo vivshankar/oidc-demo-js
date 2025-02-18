@@ -104,7 +104,6 @@ class OAuthController {
                 state: uuid(),
                 code_challenge,
                 code_challenge_method: 'S256',
-                authorization_details: config.authzDetails,
                 ...config.extraRequestParams
             }
             url = this._client.authorizationUrl(reqData);
@@ -124,7 +123,6 @@ class OAuthController {
             var parReqData = {
                 scope: this._scope,
                 state: uuid(),
-                authorization_details: config.authzDetails,
                 ...config.extraRequestParams
             }
 
