@@ -8,6 +8,6 @@ SCOPE=openid profile
 CLIENT_AUTH_METHOD=
 USE_PAR=false
 USE_DPOP=false
-RESOURCE_BASE_URL=
+RESOURCE_URL=
 USER_REGISTRATION_LINK=https://tenant.verify.ibm.com/register/verifydemo
 THEME_ID=
