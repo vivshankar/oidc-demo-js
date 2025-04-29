@@ -118,7 +118,7 @@ class OAuthController {
                 response_types: ['code'],
                 token_endpoint_auth_method: config.clientAuthMethod,
                 token_endpoint_auth_signing_alg: 'PS256',
-                id_token_signed_response_alg: 'RS256',
+                id_token_signed_response_alg: 'PS256',
             }, this._jwks);
     
             var reqData = {
