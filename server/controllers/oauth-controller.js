@@ -57,7 +57,7 @@ class OAuthController {
                 'iat': currentTimestamp,
                 'exp': Math.floor(currentTimestamp + 1*1800),
                 "htm": "GET",
-                "htu": (new URL(config.resourceUrl)).pathname,
+                "htu": (new URL(config.resourceUrl)).origin + (new URL(config.resourceUrl)).pathname,
                 "ath": ath
             };
 
