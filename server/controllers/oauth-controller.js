@@ -98,8 +98,6 @@ class OAuthController {
     }
 
     authorize = async (req, res) => {
-        console.log("About to call Issuer.discover");
-        console.log("env: " + JSON.stringify(process.env));
         this._oidcIssuer = await Issuer.discover(config.discoveryUrl);
         console.log('Discovered issuer %s %O', this._oidcIssuer.issuer, this._oidcIssuer.metadata);
 
