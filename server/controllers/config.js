@@ -35,7 +35,7 @@ exports.Config = {
     clientAuthMethod    : clientAuthMethod,
     usePar              : process.env.USE_PAR,
     useDPoP             : process.env.USE_DPOP,
-    resourceBase        : process.env.RESOURCE_BASE_URL,
+    resourceUrl        : process.env.RESOURCE_URL,
     deviceName          : deviceName,
     extraRequestParams  : extraRequestParams,
 };

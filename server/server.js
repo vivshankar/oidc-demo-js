@@ -57,11 +57,12 @@ const app = express();
 app.set('view engine', 'hbs');
 app.engine('hbs', hbs.engine)
 
+// session lifetime 10 minutes
 app.use(session({
     secret: 'supersecret',
     resave: false,
     saveUninitialized: true,
-    cookie: { path: '/', maxAge: 120 * 1000, secure: false }
+    cookie: { path: '/', maxAge: 10 * 60 * 1000, secure: false }
 }))
 
 // define routes

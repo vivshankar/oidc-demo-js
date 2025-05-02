@@ -1,13 +1,13 @@
 const config = require('./config').Config;
 const Issuer = require('openid-client').Issuer
 const generators = require('openid-client').generators
-const { uuid } = require('uuidv4');
+const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require("path");
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto');
 const HTTPUtil = require('../services/httputil');
-const resourceClient = new HTTPUtil(config.resourceBase);
+const resourceClient = new HTTPUtil((new URL(config.resourceUrl)).origin);
 
 var dpopKeyPair = {
     publicKey: null,
@@ -53,27 +53,47 @@ class OAuthController {
 
             var currentTimestamp = new Date().getTime()/1000;
             var payload = {
-                "jti": uuid(),
+                "jti": uuidv4(),
                 'iat': currentTimestamp,
-                'exp': currentTimestamp + 1*1800,
+                'exp': Math.floor(currentTimestamp + 1*1800),
                 "htm": "GET",
-                "htu": `${config.resourceBase}/photos`,
+                "htu": (new URL(config.resourceUrl)).origin + (new URL(config.resourceUrl)).pathname,
                 "ath": ath
             };
 
             dpopProof = await this._client.dpopProof(payload, key, tokenSet.access_token);
-            console.log(`DPoP proof for the resource API call=${dpopProof}`);
+            //console.log(`DPoP proof for the resource API call=${dpopProof}`);
 
             authHeader = `DPoP ${tokenSet.access_token}`;
         }
 
-        let response = await resourceClient.get('/photos', {
+        console.log("===================================================");
+        if (config.useDPoP  == "true") {
+            console.log("This client is using DPoP-based access tokens.");
+        } else {
+            console.log("This client is using plain bearer access tokens.");
+        }
+        console.log("===================================================");
+
+        console.log("Introspect request as CURL:\n" + 
+            "curl -k -i -d \"client_id=" + config.clientId + "&token=" + tokenSet.access_token + "\" \"" + this._oidcIssuer["introspection_endpoint"] + "\"");
+        
+        console.log("Resource request as CURL:\n" + 
+            "curl -k -i " +
+            "-H \"Authorization: " + ((config.useDPoP == "true") ? "DPoP" : "Bearer") + " " + tokenSet.access_token + "\"" +
+            (config.useDPoP == "true" ? (" -H \"DPoP: " + dpopProof + "\"") : "") +
+            " \"" + config.resourceUrl + "\""
+        );
+
+        let response = await resourceClient.get((new URL(config.resourceUrl)).pathname, {
             "tenant": config.tenantUrl,
             "Authorization": authHeader,
             "dpop": dpopProof,
         });
 
-        console.log(`\n\n=======\nResponse from the resource API /photos\n=======\n\n${response.data}\n`);
+        let rspTxt = JSON.stringify(response.data);
+
+        console.log(`\n\n=======\nResponse from the resource API\n=======\n\n${rspTxt}\n`);
         res.send(response.data);
     }
 
@@ -101,7 +121,7 @@ class OAuthController {
     
             var reqData = {
                 scope: this._scope,
-                state: uuid(),
+                state: uuidv4(),
                 code_challenge,
                 code_challenge_method: 'S256',
                 ...config.extraRequestParams
@@ -122,7 +142,7 @@ class OAuthController {
             // build JWT
             var parReqData = {
                 scope: this._scope,
-                state: uuid(),
+                state: uuidv4(),
                 ...config.extraRequestParams
             }
 
@@ -131,7 +151,7 @@ class OAuthController {
                 clientAssertionPayload: { 
                     sub: config.clientId, 
                     iss: config.clientId,
-                    jti: uuid(),
+                    jti: uuidv4(),
                     iat: new Date().getTime()/1000,
                     exp: (new Date().getTime() + 30 * 60 * 1000)/1000,
                     aud: this._oidcIssuer.metadata.token_endpoint,
@@ -163,7 +183,7 @@ class OAuthController {
             clientAssertionPayload = { 
                 sub: config.clientId, 
                 iss: config.clientId,
-                jti: uuid(),
+                jti: uuidv4(),
                 iat: new Date().getTime()/1000,
                 exp: (new Date().getTime() + 30 * 60 * 1000)/1000,
                 aud: this._oidcIssuer.metadata.token_endpoint,
@@ -182,7 +202,7 @@ class OAuthController {
                   type: 'pkcs8',
                   format: 'jwk',
                   cipher: 'aes-256-cbc',
-                  passphrase: uuid(),
+                  passphrase: uuidv4(),
                 }});
 
             dpopKeyPair = {
