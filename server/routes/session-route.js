@@ -19,5 +19,8 @@ router.get('/login', oauthController.authorize);
 router.get('/logout', oauthController.logout)
 router.get('/resource', oauthController.resource)
 router.get('/auth/callback', oauthController.aznCallback);
+router.get('/fclogout', oauthController.frontChannelCallback);
+router.get('/bclogout', oauthController.backChannelCallback);
+router.get('/postlogout', oauthController.postLogoutCallback);
 
 module.exports = router;
