@@ -9,6 +9,7 @@ In this app, you can do the following -
 1. Authenticating the client using a configured OIDC OP
 2. Logging out of the client
 3. Viewing the authenticated user's profile by unpacking the id_token
+4. Trigger single-logout (SLO)
 
 You can also run this in two modes:
 
@@ -50,6 +51,30 @@ There are two possible configurations supported:
     - `CLIENT_SECRET`: The OIDC client secret generated on step 1
     - `SCOPE`: If you aren't sure what to set here, just set this as `openid profile email`
     - `USE_PAR`: Set to "true"
+
+### Set up for Single-Logout
+
+This application is using cookie to store the session. In order to logout properly, cookie information need to be received.
+The application is using front-channel logout endpoint, which is called by authorization server (OP) using `iframe`.
+
+Modern browser will not forward cookie to unsecure site. Hence the application need to start in HTTPS mode.
+
+1. Assuming this application is accessible as `demoapp.com`. You can create alias in `/etc/hosts` for your localhost IP.
+
+2. Generate HTTP server key and certificate as shown below and place it under `config` folder.
+
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./server.key -out server.crt \
+-subj "/CN=demoapp.com" -addext "subjectAltName=DNS:demoapp.com,IP:127.0.0.1"
+```
+
+3. Add the certificate as trusted certificate for your browser.
+
+4. Since `demoapp.com` is not the same domain or a sub-domain of IBM Security Verify site, `demoapp.com` cookie is considered a third-party cookie for IBM Security Verify. In order for the `demoapp.com` cookie get forwarded in `iframe`, IBM Security Verify has to allow third-party cookie.
+
+5. Edit `.env` and populate the following values:
+    - POST_LOGOUT_REDIRECT_URI=https://demoapp.com:3000/postlogout
+    - USE_RP_INIT_LOGOUT=true
 
 ## Run the application
 

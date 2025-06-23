@@ -36,6 +36,8 @@ exports.Config = {
     usePar              : process.env.USE_PAR,
     useDPoP             : process.env.USE_DPOP,
     resourceBase        : process.env.RESOURCE_BASE_URL,
+    postLogoutUri       : process.env.POST_LOGOUT_REDIRECT_URI,
+    useRPInitLogout     : process.env.USE_RP_INIT_LOGOUT,
     deviceName          : deviceName,
     extraRequestParams  : extraRequestParams,
 };

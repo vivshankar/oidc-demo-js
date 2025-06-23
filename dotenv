@@ -11,3 +11,5 @@ USE_DPOP=false
 RESOURCE_BASE_URL=
 USER_REGISTRATION_LINK=https://tenant.verify.ibm.com/register/verifydemo
 THEME_ID=
+POST_LOGOUT_REDIRECT_URI=http://localhost:3000/postlogout
+USE_RP_INIT_LOGOUT=false
