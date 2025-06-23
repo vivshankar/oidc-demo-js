@@ -236,19 +236,6 @@ class OAuthController {
         res.send("Front-channel logout done.");
     }
 
-    backChannelCallback = (req, res) =>  {
-        console.log(`This application store tokens in session cookie.`);
-        console.log(`So, in order for this endpoint to destroy session properly, it need to receive session cookie.`);
-        console.log(`Since this is back-end call, cookie information is not available.`);
-        console.log(`This endpoint do not destroy session. Just print the logout_token received.`);
-
-        let logoutToken = req.body["logout_token"];
-        let decoded = jwt.decode(logoutToken);
-        console.log(`Receive SLO back-channel notification\n${JSON.stringify(decoded, null, 2)}\n`);
-
-        res.send("Back-channel logout done.");
-    }
-
     postLogoutCallback = (req, res) => {
         if (OAuthController.isLoggedIn(req)) {
             console.log("If session cookie was not forwarded to front-channel logout endpoint, the session is not properly cleared.");
@@ -264,8 +251,15 @@ class OAuthController {
             return;
         }
 
-        // initiate rp-initiated logout
-        res.redirect(this._oidcIssuer.metadata.end_session_endpoint + '?client_id=' + config.clientId + '&post_logout_redirect_uri=' + config.postLogoutUri);
+        if (config.useRPInitLogout == "true") {
+            // initiate rp-initiated logout
+            res.redirect(this._oidcIssuer.metadata.end_session_endpoint + '?client_id=' + config.clientId + '&post_logout_redirect_uri=' + config.postLogoutUri);
+        } else {
+            req.session.destroy();
+            const proxyHost = req.headers["x-forwarded-host"];
+            const host = proxyHost ? proxyHost : req.headers.host;
+            res.redirect('https://' + config.tenantUrl + '/idaas/mtfim/sps/idaas/logout?redirectUrl=' + encodeURIComponent(req.protocol + '://' + host) + "&themeId=" + config.themeId);
+        }
     }
 
     static isLoggedIn(req) {

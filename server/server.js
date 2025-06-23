@@ -63,7 +63,7 @@ app.engine('hbs', hbs.engine)
 var options = {}
 var cookieSettings = {
     path: '/',
-    maxAge: 1800 * 1000,
+    maxAge: 120 * 1000,
 }
 
 var startAsHTTPS = true

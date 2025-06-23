@@ -72,6 +72,10 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./server.key -out se
 
 4. Since `demoapp.com` is not the same domain or a sub-domain of IBM Security Verify site, `demoapp.com` cookie is considered a third-party cookie for IBM Security Verify. In order for the `demoapp.com` cookie get forwarded in `iframe`, IBM Security Verify has to allow third-party cookie.
 
+5. Edit `.env` and populate the following values:
+    - POST_LOGOUT_REDIRECT_URI=https://demoapp.com:3000/postlogout
+    - USE_RP_INIT_LOGOUT=true
+
 ## Run the application
 
 1. Install node dependencies
