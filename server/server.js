@@ -70,5 +70,5 @@ app.use('/', sessionRoutes);
 app.use('/users', usersRoutes);
 
 app.listen(PORT, () => {
-    console.log('Server started and listening on port 3000');
+    console.log(`Server started and listening on port ${PORT}`);
 });
