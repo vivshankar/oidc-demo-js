@@ -76,6 +76,7 @@ dotenv.*
 # config files
 config/jwks.json
 config/*.pem
+config/*.key
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
