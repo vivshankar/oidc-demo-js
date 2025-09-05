@@ -1,6 +1,10 @@
 const PORT = process.env.PORT || 3000;
+const USE_HTTPS = process.env.USE_HTTPS || "false";
 
 // initialize libraries
+const https = require('https');
+const fs = require('fs');
+const path = require("path");
 const express = require('express');
 const session = require('express-session')
 const handlebars = require('express-handlebars');
@@ -61,7 +65,7 @@ app.use(session({
     secret: 'supersecret',
     resave: false,
     saveUninitialized: true,
-    cookie: { path: '/', maxAge: 120 * 1000, secure: false }
+    cookie: { path: '/', maxAge: 120 * 1000, secure: (USE_HTTPS == "true") }
 }))
 
 // define routes
@@ -69,6 +73,17 @@ app.use(express.static(__dirname + '/../public'))
 app.use('/', sessionRoutes);
 app.use('/users', usersRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Server started and listening on port ${PORT}`);
-});
+if (USE_HTTPS == "true") {
+    var options = {
+        key: fs.readFileSync(path.resolve(__dirname, '../config/server.key'), 'utf8'),
+        cert: fs.readFileSync(path.resolve(__dirname, '../config/server.pem'), 'utf8')
+    };
+
+    https.createServer(options, app).listen(PORT, () => {
+        console.log(`Secure Server started and listening on port ${PORT}`);
+    });
+} else {
+    app.listen(PORT, () => {
+        console.log(`Server started and listening on port ${PORT}`);
+    });
+}

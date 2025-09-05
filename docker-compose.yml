@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  oidc-demo-js:
+    image: oidc-demo-js
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${PORT:-3000}
+      - SESSION_SECRET=${SESSION_SECRET:-supersecret}
+      - TENANT_URL=${TENANT_URL}
+      - DISCOVERY_URL=${DISCOVERY_URL}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - CLIENT_AUTH_METHOD=${CLIENT_AUTH_METHOD:-client_secret_post}
+      - REDIRECT_URI=${REDIRECT_URI}
+      - SCOPE=${SCOPE}
+      - EXTRA_REQUEST_PARAMS=${EXTRA_REQUEST_PARAMS}
+      - USER_REGISTRATION_LINK=${USER_REGISTRATION_LINK}
+      - THEME_ID=${THEME_ID}
+      - USE_PAR=${USE_PAR:-false}
+      - USE_DPOP=${USE_DPOP:-false}
+      - RESOURCE_BASE_URL=${RESOURCE_BASE_URL}
+      - DEVICE_NAME=${DEVICE_NAME}
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped
+
+# Made with Bob
